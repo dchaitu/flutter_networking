@@ -30,7 +30,7 @@ Widget recipeStringCard(String image, String label) {
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(
-            // TODO: Replace with label from recipe
+            recipe.label,
             label,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -40,7 +40,17 @@ Widget recipeStringCard(String image, String label) {
         const SizedBox(
           height: 8.0,
         ),
-        // TODO: Replace Padding section with getCalories()
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(
+            getCalories(recipe.calories),
+            style: const TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: 11,
+            ),
+          ),
+        ),
+
         const Padding(
           padding: EdgeInsets.only(left: 8.0),
           child: Text(

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-
+import '../../network/recipe_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../network/recipe_model.dart';
@@ -23,8 +23,9 @@ class _RecipeListState extends State<RecipeList> {
   late TextEditingController searchTextController;
   final ScrollController _scrollController = ScrollController();
 
-  // TODO: Replace with new API class
-  List currentSearchList = [];
+  List<APIHits> currentSearchList = [];
+
+  // List currentSearchList = [];
   int currentCount = 0;
   int currentStartPosition = 0;
   int currentEndPosition = 20;
@@ -38,8 +39,8 @@ class _RecipeListState extends State<RecipeList> {
   @override
   void initState() {
     super.initState();
-    // TODO: Remove call to loadRecipes()
-    loadRecipes();
+    // // TODO: Remove call to loadRecipes()
+    // loadRecipes();
     getPreviousSearches();
     searchTextController = TextEditingController(text: '');
     _scrollController
@@ -63,15 +64,24 @@ class _RecipeListState extends State<RecipeList> {
       });
   }
 
-  // TODO: Add getRecipeData() here
-
-  // TODO: Delete loadRecipes()
-  Future loadRecipes() async {
-    final jsonString = await rootBundle.loadString('assets/recipes1.json');
-    setState(() {
-      _currentRecipes1 = APIRecipeQuery.fromJson(jsonDecode(jsonString));
-    });
+  // 1
+  Future<APIRecipeQuery> getRecipeData(String query, int from, int to) async {
+    // 2
+    final recipeJson = await RecipeService().getRecipes(query, from, to);
+    // 3
+    final recipeMap = json.decode(recipeJson);
+    // 4
+    return APIRecipeQuery.fromJson(recipeMap);
   }
+
+
+  // // TODO: Delete loadRecipes()
+  // Future loadRecipes() async {
+  //   final jsonString = await rootBundle.loadString('assets/recipes1.json');
+  //   setState(() {
+  //     _currentRecipes1 = APIRecipeQuery.fromJson(jsonDecode(jsonString));
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -211,7 +221,33 @@ class _RecipeListState extends State<RecipeList> {
     );
   }
 
-  // TODO: Add _buildRecipeList()
+  // 1
+  Widget _buildRecipeList(BuildContext recipeListContext, List<APIHits> hits) {
+    // 2
+    final size = MediaQuery.of(context).size;
+    const itemHeight = 310;
+    final itemWidth = size.width / 2;
+    // 3
+    return Flexible(
+      // 4
+      child: GridView.builder(
+        // 5
+        controller: _scrollController,
+        // 6
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: (itemWidth / itemHeight),
+        ),
+        // 7
+        itemCount: hits.length,
+        // 8
+        itemBuilder: (BuildContext context, int index) {
+          return _buildRecipeCard(recipeListContext, hits, index);
+        },
+      ),
+    );
+  }
+
 
   Widget _buildRecipeCard(
       BuildContext topLevelContext, List<APIHits> hits, int index) {
@@ -224,8 +260,8 @@ class _RecipeListState extends State<RecipeList> {
           },
         ));
       },
-      // TODO: Replace with recipeCard
-      child: recipeStringCard(recipe.image, recipe.label),
+      child: recipeCard(recipe),
+      // child: recipeStringCard(recipe.image, recipe.label),
     );
   }
 }
